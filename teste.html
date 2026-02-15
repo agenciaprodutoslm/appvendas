@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste - Vendas Alert</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #00d4ff;
+            --success: #00ff88;
+            --danger: #ff0055;
+            --warning: #ffaa00;
+            --text: #e0e0e0;
+            --text-dim: #888888;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .test-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .test-card:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .test-card h2 {
+            font-size: 18px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-card .icon {
+            font-size: 24px;
+        }
+
+        .test-card p {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 170, 0, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .status-badge.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .status-badge.error {
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            color: var(--primary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+            font-family: monospace;
+            overflow-x: auto;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.success {
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .result.error {
+            background: rgba(255, 0, 85, 0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .result.info {
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: monospace;
+        }
+
+        .summary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .summary h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item .name {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .summary-item .status {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .summary-item .status.ok {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+        }
+
+        .summary-item .status.fail {
+            background: rgba(255, 0, 85, 0.2);
+            color: var(--danger);
+        }
+
+        .summary-item .status.pending {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .tests-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Teste - Vendas Alert</h1>
+            <p>Validar integração PWA + n8n + Netlify Function</p>
+        </div>
+
+        <div class="tests-grid">
+            <!-- Teste 1: Service Worker -->
+            <div class="test-card">
+                <h2><span class="icon">🔧</span> Service Worker</h2>
+                <p>Verifica se o Service Worker está registrado corretamente</p>
+                <div class="status-badge pending" id="sw-badge">⏳ Pendente</div>
+                <button onclick="testServiceWorker()">Testar</button>
+                <div class="result" id="sw-result"></div>
+            </div>
+
+            <!-- Teste 2: Notificações -->
+            <div class="test-card">
+                <h2><span class="icon">🔔</span> Permissão Notificações</h2>
+                <p>Verifica se notificações estão ativadas no navegador</p>
+                <div class="status-badge pending" id="notif-badge">⏳ Pendente</div>
+                <button onclick="testNotifications()">Testar</button>
+                <div class="result" id="notif-result"></div>
+            </div>
+
+            <!-- Teste 3: localStorage -->
+            <div class="test-card">
+                <h2><span class="icon">💾</span> Armazenamento Local</h2>
+                <p>Verifica se localStorage está funcionando</p>
+                <div class="status-badge pending" id="storage-badge">⏳ Pendente</div>
+                <button onclick="testStorage()">Testar</button>
+                <div class="result" id="storage-result"></div>
+            </div>
+
+            <!-- Teste 4: Netlify Function -->
+            <div class="test-card">
+                <h2><span class="icon">⚡</span> Netlify Function</h2>
+                <p>Verifica se a função Netlify está respondendo</p>
+                <div class="status-badge pending" id="netlify-badge">⏳ Pendente</div>
+                <button onclick="testNetlifyFunction()">Testar</button>
+                <div class="result" id="netlify-result"></div>
+            </div>
+
+            <!-- Teste 5: Webhook n8n -->
+            <div class="test-card">
+                <h2><span class="icon">🌐</span> Webhook n8n</h2>
+                <p>Verifica se o webhook do n8n está acessível</p>
+                <div class="status-badge pending" id="webhook-badge">⏳ Pendente</div>
+                <button onclick="testWebhook()">Testar</button>
+                <div class="result" id="webhook-result"></div>
+            </div>
+
+            <!-- Teste 6: PWA Instalável -->
+            <div class="test-card">
+                <h2><span class="icon">📱</span> PWA Instalável</h2>
+                <p>Verifica se a PWA pode ser instalada</p>
+                <div class="status-badge pending" id="pwa-badge">⏳ Pendente</div>
+                <button onclick="testPWA()">Testar</button>
+                <div class="result" id="pwa-result"></div>
+            </div>
+        </div>
+
+        <!-- Enviar Notificação Teste -->
+        <div class="test-card" style="margin-bottom: 40px;">
+            <h2><span class="icon">📤</span> Enviar Notificação de Teste</h2>
+            <p>Simule um envio de notificação sem precisar do Postman</p>
+
+            <div class="form-group">
+                <label>Cliente:</label>
+                <input type="text" id="testCliente" placeholder="João Silva" value="João Silva">
+            </div>
+
+            <div class="form-group">
+                <label>Produto:</label>
+                <input type="text" id="testProduto" placeholder="Plano Premium" value="Plano Premium">
+            </div>
+
+            <div class="form-group">
+                <label>Valor (R$):</label>
+                <input type="text" id="testValor" placeholder="2.999,99" value="2.999,99">
+            </div>
+
+            <div class="form-group">
+                <label>URL da Imagem:</label>
+                <input type="text" id="testImagem" placeholder="https://..." value="https://via.placeholder.com/100?text=Teste">
+            </div>
+
+            <button onclick="enviarNotificacaoTeste()">🚀 Enviar Notificação de Teste</button>
+            <div class="result" id="send-result"></div>
+        </div>
+
+        <!-- Resumo -->
+        <div class="summary">
+            <h3>📋 Resumo dos Testes</h3>
+            <div class="summary-item">
+                <span class="name">Service Worker</span>
+                <span class="status pending" id="summary-sw"><span class="spinner"></span> Teste</span>
+            </div>
+            <div class="summary-item">
+                <span class="name">Notificações</span>
+                <span class="status pending" id="summary-notif"><span class="spinner"></span> Teste</span>
+            </div>
+            <div class="summary-item">
+                <span class="name">localStorage</span>
+                <span class="status pending" id="summary-storage"><span class="spinner"></span> Teste</span>
+            </div>
+            <div class="summary-item">
+                <span class="name">Netlify Function</span>
+                <span class="status pending" id="summary-netlify"><span class="spinner"></span> Teste</span>
+            </div>
+            <div class="summary-item">
+                <span class="name">Webhook n8n</span>
+                <span class="status pending" id="summary-webhook"><span class="spinner"></span> Teste</span>
+            </div>
+            <div class="summary-item">
+                <span class="name">PWA Instalável</span>
+                <span class="status pending" id="summary-pwa"><span class="spinner"></span> Teste</span>
+            </div>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 212, 255, 0.1);">
+                <button onclick="executarTodosTestes()" style="background: linear-gradient(135deg, #ff0055, #ffaa00);">
+                    ▶️ Executar Todos os Testes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cores para resultados
+        const colors = {
+            success: 'success',
+            error: 'error',
+            info: 'info'
+        };
+
+        // Teste 1: Service Worker
+        async function testServiceWorker() {
+            const badge = document.getElementById('sw-badge');
+            const result = document.getElementById('sw-result');
+            badge.className = 'status-badge pending';
+            badge.textContent = '⏳ Testando...';
+
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    
+                    if (registrations.length > 0) {
+                        badge.className = 'status-badge success';
+                        badge.textContent = '✅ Sucesso';
+                        result.className = 'result show success';
+                        result.innerHTML = `✅ Service Worker registrado corretamente<br>Registros: ${registrations.length}`;
+                        updateSummary('summary-sw', 'ok');
+                    } else {
+                        badge.className = 'status-badge error';
+                        badge.textContent = '❌ Erro';
+                        result.className = 'result show error';
+                        result.innerHTML = `❌ Service Worker não está registrado`;
+                        updateSummary('summary-sw', 'fail');
+                    }
+                } else {
+                    throw new Error('Navegador não suporta Service Worker');
+                }
+            } catch (error) {
+                badge.className = 'status-badge error';
+                badge.textContent = '❌ Erro';
+                result.className = 'result show error';
+                result.innerHTML = `❌ Erro: ${error.message}`;
+                updateSummary('summary-sw', 'fail');
+            }
+        }
+
+        // Teste 2: Notificações
+        async function testNotifications() {
+            const badge = document.getElementById('notif-badge');
+            const result = document.getElementById('notif-result');
+            badge.className = 'status-badge pending';
+            badge.textContent = '⏳ Testando...';
+
+            try {
+                if (!('Notification' in window)) {
+                    throw new Error('Navegador não suporta notificações');
+                }
+
+                if (Notification.permission === 'granted') {
+                    badge.className = 'status-badge success';
+                    badge.textContent = '✅ Ativadas';
+                    result.className = 'result show success';
+                    result.innerHTML = `✅ Notificações já estão ativadas`;
+                    updateSummary('summary-notif', 'ok');
+                } else if (Notification.permission === 'denied') {
+                    badge.className = 'status-badge error';
+                    badge.textContent = '❌ Bloqueadas';
+                    result.className = 'result show error';
+                    result.innerHTML = `❌ Notificações bloqueadas pelo navegador`;
+                    updateSummary('summary-notif', 'fail');
+                } else {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        badge.className = 'status-badge success';
+                        badge.textContent = '✅ Ativadas';
+                        result.className = 'result show success';
+                        result.innerHTML = `✅ Notificações ativadas com sucesso`;
+                        updateSummary('summary-notif', 'ok');
+                    }
+                }
+            } catch (error) {
+                badge.className = 'status-badge error';
+                badge.textContent = '❌ Erro';
+                result.className = 'result show error';
+                result.innerHTML = `❌ Erro: ${error.message}`;
+                updateSummary('summary-notif', 'fail');
+            }
+        }
+
+        // Teste 3: localStorage
+        function testStorage() {
+            const badge = document.getElementById('storage-badge');
+            const result = document.getElementById('storage-result');
+            badge.className = 'status-badge pending';
+            badge.textContent = '⏳ Testando...';
+
+            try {
+                const test = '__storage_test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+
+                const notifications = localStorage.getItem('notifications');
+                const count = notifications ? JSON.parse(notifications).length : 0;
+
+                badge.className = 'status-badge success';
+                badge.textContent = '✅ Funciona';
+                result.className = 'result show success';
+                result.innerHTML = `✅ localStorage funciona corretamente<br>Notificações armazenadas: ${count}`;
+                updateSummary('summary-storage', 'ok');
+            } catch (error) {
+                badge.className = 'status-badge error';
+                badge.textContent = '❌ Erro';
+                result.className = 'result show error';
+                result.innerHTML = `❌ Erro: ${error.message}<br>localStorage pode estar bloqueado`;
+                updateSummary('summary-storage', 'fail');
+            }
+        }
+
+        // Teste 4: Netlify Function
+        async function testNetlifyFunction() {
+            const badge = document.getElementById('netlify-badge');
+            const result = document.getElementById('netlify-result');
+            badge.className = 'status-badge pending';
+            badge.textContent = '⏳ Testando...';
+
+            try {
+                const response = await fetch('/.netlify/functions/webhook', {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    badge.className = 'status-badge success';
+                    badge.textContent = '✅ Online';
+                    result.className = 'result show success';
+                    result.innerHTML = `✅ Netlify Function está online<br>Endpoint: /.netlify/functions/webhook`;
+                    updateSummary('summary-netlify', 'ok');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                badge.className = 'status-badge error';
+                badge.textContent = '❌ Offline';
+                result.className = 'result show error';
+                result.innerHTML = `❌ Netlify Function não respondeu<br>Erro: ${error.message}`;
+                updateSummary('summary-netlify', 'fail');
+            }
+        }
+
+        // Teste 5: Webhook n8n
+        async function testWebhook() {
+            const badge = document.getElementById('webhook-badge');
+            const result = document.getElementById('webhook-result');
+            badge.className = 'status-badge pending';
+            badge.textContent = '⏳ Testando...';
+
+            try {
+                const response = await fetch('https://webhook.msgagenciadigital.com/webhook/notificavendasapp', {
+                    method: 'GET'
+                });
+
+                if (response.ok || response.status === 405) {
+                    // 405 significa que o endpoint existe mas GET não é permitido
+                    badge.className = 'status-badge success';
+                    badge.textContent = '✅ Online';
+                    result.className = 'result show success';
+                    result.innerHTML = `✅ Webhook n8n está online<br>Pronto para receber POST`;
+                    updateSummary('summary-webhook', 'ok');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                badge.className = 'status-badge error';
+                badge.textContent = '❌ Offline';
+                result.className = 'result show error';
+                result.innerHTML = `❌ Webhook n8n não respondeu<br>Erro: ${error.message}`;
+                updateSummary('summary-webhook', 'fail');
+            }
+        }
+
+        // Teste 6: PWA Instalável
+        function testPWA() {
+            const badge = document.getElementById('pwa-badge');
+            const result = document.getElementById('pwa-result');
+            badge.className = 'status-badge pending';
+            badge.textContent = '⏳ Testando...';
+
+            try {
+                if ('serviceWorker' in navigator) {
+                    const manifest = document.querySelector('link[rel="manifest"]');
+                    if (manifest) {
+                        badge.className = 'status-badge success';
+                        badge.textContent = '✅ Pronta';
+                        result.className = 'result show success';
+                        result.innerHTML = `✅ PWA está configurada corretamente<br>Manifest encontrado`;
+                        updateSummary('summary-pwa', 'ok');
+                    } else {
+                        throw new Error('Manifest não encontrado');
+                    }
+                } else {
+                    throw new Error('Service Worker não suportado');
+                }
+            } catch (error) {
+                badge.className = 'status-badge error';
+                badge.textContent = '❌ Erro';
+                result.className = 'result show error';
+                result.innerHTML = `❌ Erro: ${error.message}`;
+                updateSummary('summary-pwa', 'fail');
+            }
+        }
+
+        // Enviar Notificação de Teste
+        async function enviarNotificacaoTeste() {
+            const cliente = document.getElementById('testCliente').value;
+            const produto = document.getElementById('testProduto').value;
+            const valor = document.getElementById('testValor').value;
+            const imageUrl = document.getElementById('testImagem').value;
+            const result = document.getElementById('send-result');
+
+            result.className = 'result show info';
+            result.innerHTML = '<span class="spinner"></span> Enviando...';
+
+            try {
+                const response = await fetch('/.netlify/functions/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cliente,
+                        produto,
+                        valor,
+                        imageUrl
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.className = 'result show success';
+                    result.innerHTML = `✅ Notificação enviada com sucesso!<br>
+Status: ${data.message}<br>
+Cliente: ${data.data.cliente}<br>
+Valor: ${data.data.valor}<br>
+Timestamp: ${data.data.timestamp}`;
+                    
+                    // Tocar som
+                    playSound();
+                } else {
+                    throw new Error(data.error || 'Erro desconhecido');
+                }
+            } catch (error) {
+                result.className = 'result show error';
+                result.innerHTML = `❌ Erro ao enviar notificação:<br>${error.message}`;
+            }
+        }
+
+        // Executar todos os testes
+        async function executarTodosTestes() {
+            testServiceWorker();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            testNotifications();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            testStorage();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            testNetlifyFunction();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            testWebhook();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            testPWA();
+        }
+
+        // Atualizar resumo
+        function updateSummary(elementId, status) {
+            const el = document.getElementById(elementId);
+            if (status === 'ok') {
+                el.className = 'status ok';
+                el.innerHTML = '✅ OK';
+            } else if (status === 'fail') {
+                el.className = 'status fail';
+                el.innerHTML = '❌ FALHA';
+            }
+        }
+
+        // Toque som
+        function playSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Executar testes ao carregar
+        window.addEventListener('load', () => {
+            console.log('🧪 Página de teste carregada');
+        });
+    </script>
+</body>
+</html>
