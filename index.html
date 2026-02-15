@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vendas Alert">
+    <title>Vendas Alert - Notificações em Tempo Real</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231a1a2e' width='192' height='192'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='%2300d4ff' font-weight='bold' font-family='system-ui'>$</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%231a1a2e' width='180' height='180'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='70' fill='%2300d4ff' font-weight='bold' font-family='system-ui'>$</text></svg>">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #00d4ff;
+            --success: #00ff88;
+            --danger: #ff0055;
+            --text: #e0e0e0;
+            --text-dim: #888888;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            padding: 24px 0 16px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+            margin-bottom: 24px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Setup Section */
+        .setup-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .setup-card h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #00ff88);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-danger {
+            background: rgba(255, 0, 85, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 0, 85, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Status */
+        .status {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .status.error {
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .status.info {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        /* Notifications List */
+        .notifications-section {
+            margin-top: 24px;
+            flex: 1;
+        }
+
+        .notifications-section h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .notification-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--accent);
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.4s ease-out;
+            display: flex;
+            gap: 12px;
+        }
+
+        .notification-item.received {
+            border-left-color: var(--success);
+        }
+
+        .notification-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Install Banner */
+        .install-banner {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .install-banner.show {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .install-banner p {
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .install-banner button {
+            flex: 0;
+            padding: 8px 14px;
+            font-size: 12px;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .pulsing {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-height: 700px) {
+            .container {
+                padding: 12px;
+            }
+            .header {
+                padding: 12px 0 8px;
+                margin-bottom: 12px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 VENDAS ALERT</h1>
+            <p>Notificações em tempo real</p>
+        </div>
+
+        <div class="install-banner" id="installBanner">
+            <p>Instale o app para receber notificações</p>
+            <button class="btn-secondary" onclick="installPWA()" style="flex: 0; padding: 8px 12px; font-size: 12px;">Instalar</button>
+            <button class="btn-secondary" onclick="closeInstallBanner()" style="flex: 0; padding: 8px 12px; font-size: 12px;">Agora não</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div class="setup-card">
+            <h2>🔧 Configuração</h2>
+            
+            <div class="form-group">
+                <label for="webhookUrl">URL do Webhook n8n:</label>
+                <input 
+                    type="text" 
+                    id="webhookUrl" 
+                    placeholder="https://seu-n8n.com/webhook/vendas"
+                    value="https://seu-n8n.com/webhook/vendas"
+                >
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="requestNotificationPermission()">
+                    🔔 Ativar Notificações
+                </button>
+                <button class="btn-secondary" onclick="testNotification()">
+                    📢 Teste
+                </button>
+            </div>
+        </div>
+
+        <div class="setup-card">
+            <h2>📤 Simular Venda (Teste Local)</h2>
+            
+            <div class="form-group">
+                <label for="testValue">Valor (R$):</label>
+                <input type="text" id="testValue" placeholder="1.999,99" value="2.999,99">
+            </div>
+
+            <div class="form-group">
+                <label for="testClient">Cliente:</label>
+                <input type="text" id="testClient" placeholder="Nome do cliente" value="João Silva">
+            </div>
+
+            <div class="form-group">
+                <label for="testProduct">Produto:</label>
+                <input type="text" id="testProduct" placeholder="Nome do produto" value="Plano Premium">
+            </div>
+
+            <div class="form-group">
+                <label for="testImageUrl">URL da Imagem:</label>
+                <input type="text" id="testImageUrl" placeholder="https://..." value="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect fill='%2300d4ff' width='200' height='200'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white' font-weight='bold' font-family='system-ui'>$</text></svg>">
+            </div>
+
+            <button class="btn-primary" onclick="simulateSale()">
+                🎯 Simular Venda
+            </button>
+        </div>
+
+        <div class="notifications-section">
+            <h2>📋 Histórico</h2>
+            <div id="notificationsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => {
+                    console.log('✅ Service Worker registrado:', reg);
+                    showStatus('Service Worker ativado', 'success');
+                })
+                .catch(err => {
+                    console.error('❌ Erro ao registrar Service Worker:', err);
+                    showStatus('Erro ao registrar Service Worker', 'error');
+                });
+        }
+
+        // Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').classList.add('show');
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showStatus('App instalado com sucesso!', 'success');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        function closeInstallBanner() {
+            document.getElementById('installBanner').classList.remove('show');
+        }
+
+        // Status Messages
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status show ${type}`;
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusEl.classList.remove('show');
+                }, 4000);
+            }
+        }
+
+        // Request Notification Permission
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                showStatus('Seu navegador não suporta notificações', 'error');
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                showStatus('Notificações já ativadas ✅', 'success');
+                return;
+            }
+
+            if (Notification.permission !== 'denied') {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        showStatus('Notificações ativadas com sucesso! ✅', 'success');
+                    } else {
+                        showStatus('Permissão de notificações negada', 'error');
+                    }
+                } catch (err) {
+                    console.error('Erro ao solicitar permissão:', err);
+                    showStatus('Erro ao solicitar permissão de notificações', 'error');
+                }
+            }
+        }
+
+        // Test Notification
+        function testNotification() {
+            if (Notification.permission !== 'granted') {
+                showStatus('Ative as notificações primeiro', 'error');
+                return;
+            }
+
+            const notification = new Notification('🎉 Teste de Notificação', {
+                body: 'Se você recebeu esta mensagem, tudo está funcionando!',
+                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect fill="%231a1a2e" width="192" height="192"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="80" fill="%2300d4ff" font-weight="bold" font-family="system-ui">✓</text></svg>',
+                badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect fill="%2300ff88" width="192" height="192"/></svg>',
+                tag: 'test-notification'
+            });
+
+            playSound();
+        }
+
+        // Simulate Sale
+        async function simulateSale() {
+            const valor = document.getElementById('testValue').value;
+            const cliente = document.getElementById('testClient').value;
+            const produto = document.getElementById('testProduct').value;
+            const imageUrl = document.getElementById('testImageUrl').value;
+
+            const notification = {
+                valor,
+                cliente,
+                produto,
+                imageUrl,
+                timestamp: new Date().toISOString()
+            };
+
+            // Store in localStorage
+            let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            notifications.unshift(notification);
+            localStorage.setItem('notifications', JSON.stringify(notifications.slice(0, 50)));
+
+            // Show notification
+            if (Notification.permission === 'granted') {
+                new Notification(`💰 Venda: ${cliente}`, {
+                    body: `${produto} - R$ ${valor}`,
+                    icon: imageUrl,
+                    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect fill="%2300ff88" width="192" height="192"/></svg>',
+                    tag: 'venda-notification'
+                });
+            }
+
+            playSound();
+            renderNotifications();
+            showStatus(`Venda simulada: ${cliente} - R$ ${valor}`, 'success');
+        }
+
+        // Play Sound
+        function playSound() {
+            // Web Audio API para som
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Render Notifications List
+        function renderNotifications() {
+            const container = document.getElementById('notificationsList');
+            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+
+            if (notifications.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Nenhuma notificação recebida ainda.<br>Configure o webhook ou teste localmente.</p></div>';
+                return;
+            }
+
+            container.innerHTML = notifications.map((notif, i) => {
+                const time = new Date(notif.timestamp).toLocaleTimeString('pt-BR');
+                return `
+                    <div class="notification-item received">
+                        <img src="${notif.imageUrl}" class="notification-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/></svg>'">
+                        <div class="notification-content">
+                            <div class="notification-title">${notif.cliente}</div>
+                            <div class="notification-value">R$ ${notif.valor}</div>
+                            <div class="notification-time">${notif.produto} • ${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initial render
+        renderNotifications();
+
+        // Listen for messages from Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'NEW_NOTIFICATION') {
+                    renderNotifications();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
