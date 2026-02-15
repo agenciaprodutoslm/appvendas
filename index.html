@@ -169,16 +169,6 @@
             background: rgba(0, 212, 255, 0.3);
         }
 
-        .btn-danger {
-            background: rgba(255, 0, 85, 0.2);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-
-        .btn-danger:hover {
-            background: rgba(255, 0, 85, 0.3);
-        }
-
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -386,12 +376,12 @@
             <h2>🔧 Configuração</h2>
             
             <div class="form-group">
-                <label for="webhookUrl">URL do Webhook n8n:</label>
+                <label for="webhookUrl">URL do Webhook n8n (opcional):</label>
                 <input 
                     type="text" 
                     id="webhookUrl" 
-                    placeholder="https://webhook.msgagenciadigital.com/webhook/notificavendasapp"
-                    value="https://webhook.msgagenciadigital.com/webhook/notificavendasapp"
+                    placeholder="https://seu-n8n.com/webhook/vendas"
+                    value=""
                 >
             </div>
 
@@ -440,6 +430,82 @@
     </div>
 
     <script>
+        // NOVO: Interceptar fetch para aceitar POST do n8n sem erro 404
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const [resource, config] = args;
+            
+            // Se for POST para a raiz, processa como webhook do n8n
+            if (config?.method === 'POST' && 
+                (resource === '/' || resource === '' || resource === window.location.href)) {
+                
+                try {
+                    const body = JSON.parse(config.body);
+                    handleWebhookPost(body);
+                    
+                    // Retornar resposta 200 OK
+                    return Promise.resolve(
+                        new Response(JSON.stringify({ 
+                            success: true, 
+                            message: 'Notificação recebida'
+                        }), {
+                            status: 200,
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                    );
+                } catch (error) {
+                    console.error('Erro ao processar webhook:', error);
+                    return Promise.resolve(
+                        new Response(JSON.stringify({ 
+                            success: false, 
+                            error: error.message 
+                        }), {
+                            status: 200,
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                    );
+                }
+            }
+            
+            return originalFetch.apply(this, args);
+        };
+
+        // Função para processar webhook do n8n
+        function handleWebhookPost(data) {
+            console.log('📬 Webhook recebido do n8n:', data);
+            
+            const notification = {
+                cliente: data.cliente || 'Nova Venda',
+                produto: data.produto || 'Produto',
+                valor: data.valor || '0,00',
+                imageUrl: data.imageUrl || getDefaultImage(),
+                timestamp: data.timestamp || new Date().toISOString()
+            };
+
+            // Salvar no localStorage
+            let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            notifications.unshift(notification);
+            localStorage.setItem('notifications', JSON.stringify(notifications.slice(0, 50)));
+
+            // Mostrar notificação
+            if (Notification.permission === 'granted') {
+                new Notification(`💰 ${notification.cliente}`, {
+                    body: `${notification.produto} - R$ ${notification.valor}`,
+                    icon: notification.imageUrl,
+                    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect fill="%2300ff88" width="192" height="192"/></svg>',
+                    tag: 'venda-notification'
+                });
+            }
+
+            playSound();
+            renderNotifications();
+            showStatus(`✅ Notificação recebida: ${notification.cliente}`, 'success');
+        }
+
+        function getDefaultImage() {
+            return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="%2300d4ff" width="200" height="200"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="80" fill="white" font-weight="bold" font-family="system-ui">$</text></svg>';
+        }
+
         // Service Worker Registration
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js')
