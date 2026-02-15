@@ -1,24 +1,25 @@
 # netlify.toml
-[build]
-  command = "echo 'PWA pronta!'"
-  publish = "."
+# Configuração Netlify com Netlify Functions ativadas
 
-# Headers necessários para PWA
+[build]
+  command = "echo 'PWA com Netlify Functions pronta!'"
+  publish = "."
+  functions = ".netlify/functions"
+
+# Headers necessários para PWA e Functions
 [[headers]]
   for = "/*"
   [headers.values]
-    # Permitir Service Worker em subdomínios
     Service-Worker-Allowed = "/"
-    # Cache Control
     Cache-Control = "public, max-age=3600"
-    # Segurança
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
-    # Referrer Policy (para imagens de terceiros)
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Permissions Policy para notificações
     Permissions-Policy = "notifications=*, vibrate=*"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
 
 # Headers específicos para HTML
 [[headers]]
@@ -42,18 +43,24 @@
     Cache-Control = "public, max-age=604800"
     Content-Type = "application/manifest+json"
 
-# Redirect HTTP para HTTPS (automático na Netlify)
+# Headers para Functions (IMPORTANTE)
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Content-Type = "application/json"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+# Redirects
 [[redirects]]
   from = "http://*"
   to = "https://:splat"
   status = 301
   force = true
 
-# Single Page App - redireciona 404 para index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# Webhook endpoint (para testes)
-# Documentação: https://docs.netlify.com/functions/overview/
