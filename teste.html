@@ -587,7 +587,6 @@
                 });
 
                 if (response.ok || response.status === 405) {
-                    // 405 significa que o endpoint existe mas GET não é permitido
                     badge.className = 'status-badge success';
                     badge.textContent = '✅ Online';
                     result.className = 'result show success';
@@ -605,27 +604,35 @@
             }
         }
 
-        // Teste 6: PWA Instalável
-        function testPWA() {
+        // Teste 6: PWA Instalável (CORRIGIDO)
+        async function testPWA() {
             const badge = document.getElementById('pwa-badge');
             const result = document.getElementById('pwa-result');
             badge.className = 'status-badge pending';
             badge.textContent = '⏳ Testando...';
 
             try {
-                if ('serviceWorker' in navigator) {
-                    const manifest = document.querySelector('link[rel="manifest"]');
-                    if (manifest) {
-                        badge.className = 'status-badge success';
-                        badge.textContent = '✅ Pronta';
-                        result.className = 'result show success';
-                        result.innerHTML = `✅ PWA está configurada corretamente<br>Manifest encontrado`;
-                        updateSummary('summary-pwa', 'ok');
-                    } else {
-                        throw new Error('Manifest não encontrado');
-                    }
-                } else {
+                // Verificar Service Worker
+                if (!('serviceWorker' in navigator)) {
                     throw new Error('Service Worker não suportado');
+                }
+
+                // Verificar manifest.json via fetch
+                const manifestResponse = await fetch('/manifest.json');
+                if (!manifestResponse.ok) {
+                    throw new Error(`Manifest retornou HTTP ${manifestResponse.status}`);
+                }
+
+                const manifestData = await manifestResponse.json();
+                
+                if (manifestData && manifestData.name) {
+                    badge.className = 'status-badge success';
+                    badge.textContent = '✅ Pronta';
+                    result.className = 'result show success';
+                    result.innerHTML = `✅ PWA está configurada corretamente<br>Manifest: ${manifestData.name}`;
+                    updateSummary('summary-pwa', 'ok');
+                } else {
+                    throw new Error('Manifest JSON inválido');
                 }
             } catch (error) {
                 badge.className = 'status-badge error';
@@ -669,7 +676,6 @@ Cliente: ${data.data.cliente}<br>
 Valor: ${data.data.valor}<br>
 Timestamp: ${data.data.timestamp}`;
                     
-                    // Tocar som
                     playSound();
                 } else {
                     throw new Error(data.error || 'Erro desconhecido');
